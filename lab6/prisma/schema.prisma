@@ -8,6 +8,14 @@ datasource db {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// New table in prisma
+model CraftRecipe {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  description String
+  items       Item[] @relation("CraftRecipeItems")
+}
+
 model biome {
   biome_id       Int              @id @default(autoincrement())
   biome_name     String           @db.VarChar(32)
@@ -68,7 +76,7 @@ model creaturedrop {
   item_id               Int
   quantity_of_resources Int      @db.SmallInt
   creature              creature @relation(fields: [creature_id], references: [creature_id], onDelete: NoAction, onUpdate: NoAction)
-  item                  item     @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
+  item                  Item     @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([creature_id, item_id])
 }
@@ -121,7 +129,7 @@ model gamecharacter {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model item {
+model Item {
   item_id        Int              @id @default(autoincrement())
   item_name      String           @db.VarChar(32)
   max_stack      Int              @db.SmallInt
@@ -133,13 +141,15 @@ model item {
   itemtoitemtype itemtoitemtype[]
   itemtypefood   itemtypefood[]   @ignore
   startitem      startitem[]
+
+  craftRecipe CraftRecipe? @relation("CraftRecipeItems", fields: [recipe_id], references: [id])
 }
 
 model itemsinbiome {
   item_id  Int
   biome_id Int
   biome    biome @relation(fields: [biome_id], references: [biome_id], onDelete: NoAction, onUpdate: NoAction)
-  item     item  @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
+  item     Item  @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([biome_id, item_id])
 }
@@ -153,7 +163,7 @@ model itemstypes {
 model itemtoitemtype {
   item_id      Int
   item_type_id Int
-  item         item       @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
+  item         Item       @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
   itemstypes   itemstypes @relation(fields: [item_type_id], references: [item_type_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([item_id, item_type_id])
@@ -164,7 +174,7 @@ model itemtypefood {
   item_id              Int
   food_characteristic  type_food_characteristic
   characteristic_value Float                    @db.Real
-  item                 item                     @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
+  item                 Item                     @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@ignore
 }
@@ -185,7 +195,7 @@ model startitem {
   item_id               Int
   quantity_of_resources Int           @db.SmallInt
   gamecharacter         gamecharacter @relation(fields: [character_id], references: [character_id], onDelete: NoAction, onUpdate: NoAction)
-  item                  item          @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
+  item                  Item          @relation(fields: [item_id], references: [item_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([character_id, item_id])
 }
